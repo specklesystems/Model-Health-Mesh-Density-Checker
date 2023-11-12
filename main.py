@@ -1,10 +1,8 @@
-"""This module contains the business logic of the function.
+"""This module contains the business logic for a Speckle Automate function.
 
-use the automation_context module to wrap your function in an Autamate context helper
+The purpose is to demonstrate how one can use the automation_context module
+to process and analyze data in a Speckle project.
 """
-
-import time
-
 from pydantic import Field
 from speckle_automate import (
     AutomateBase,
@@ -12,97 +10,129 @@ from speckle_automate import (
     execute_automate_function,
 )
 
-from flatten import flatten_base
+import Objects.objects
+from Objects.objects import (
+    attach_visual_markers,
+    colorise_densities,
+    create_health_objects,
+    density_summary,
+)
+from Utilities.reporting import Report
+from Utilities.utilities import Utilities
+
+## new render materials for objects passing/failing
+## swap those into the original commit object
+## send that back to the server
 
 
 class FunctionInputs(AutomateBase):
-    """These are function author defined values.
+    """Definition of user inputs for this function.
 
-    Automate will make sure to supply them matching the types specified here.
-    Please use the pydantic model schema to define your inputs:
-    https://docs.pydantic.dev/latest/usage/models/
+    These fields define the parameters that users can adjust when triggering
+    this function in the Speckle web application.
     """
 
-    forbidden_speckle_type: str = Field(
-        title="Forbidden speckle type",
+    density_level: float = Field(
+        title="Density Threshold",
         description=(
-            "If a object has the following speckle_type,"
-            " it will be marked with an error."
+            "Set a density value as the threshold. Objects with "
+            "densities exceeding this value will be highlighted."
         ),
+    )
+    max_percentage_high_density_objects: float = Field(
+        title="High Density Object Limit (%)",
+        description=(
+            "Specify the maximum percentage (0-1) of objects you're "
+            "willing to allow above the set density threshold. "
+            "For instance, a value of 0.1 means you'll tolerate up "
+            "to 10% of the objects having a density above the threshold."
+        ),
+        ge=0.0,
+        le=1.0,
     )
 
 
 def automate_function(
-    automate_context: AutomationContext,
-    function_inputs: FunctionInputs,
+        automate_context: AutomationContext, function_inputs: FunctionInputs
 ) -> None:
-    """This is an example Speckle Automate function.
+    """Analyzes Speckle data and provides visual markers and notifications.
+
+    Fetches the specified version of the Speckle project, evaluates its objects
+    based on their density, and reports results visually and as notifications.
 
     Args:
-        automate_context: A context helper object, that carries relevant information
-            about the runtime context of this function.
-            It gives access to the Speckle project data, that triggered this run.
-            It also has conveniece methods attach result data to the Speckle model.
-        function_inputs: An instance object matching the defined schema.
+        automate_context (AutomationContext): Context for the current run,
+            providing methods to fetch project data and send results.
+        function_inputs (FunctionInputs): User-defined parameters guiding
+            the analysis.
     """
-    # the context provides a conveniet way, to receive the triggering version
+    # Fetch the root object of the specified Speckle project version.
     version_root_object = automate_context.receive_version()
 
-    sleep_cycles = 10
-    for i in range(sleep_cycles):
-        print(f"sleeping {i}/{sleep_cycles}")
-        time.sleep(5)
+    # Filter out objects to keep only displayable ones with valid IDs.
+    displayable_bases = Utilities.filter_displayable_bases(version_root_object)
 
-    count = 0
-    for b in flatten_base(version_root_object):
-        if b.speckle_type == function_inputs.forbidden_speckle_type:
-            if not b.id:
-                raise ValueError("Cannot operate on objects without their id's.")
+    if not displayable_bases:
+        automate_context.mark_run_failed("No displayable mesh objects found.")
+        return
 
-            automate_context.attach_error_to_objects(
-                category="Forbidden speckle_type",
-                object_ids=b.id,
-                message="This project should not contain the type: "
-                f"{b.speckle_type}",
-            )
-            count += 1
+    # Transform filtered objects to health objects for density analysis.
+    health_objects = create_health_objects(displayable_bases)
 
-    if count > 0:
-        # this is how a run is marked with a failure cause
+    # Attach visual cues and notifications based on object densities.
+    attach_visual_markers(
+        automate_context, health_objects, function_inputs.density_level
+    )
+
+    colorise_densities(automate_context, health_objects)
+
+    # Wrap up the analysis by marking the run either successful or failed.
+    pass_rate_percentage = function_inputs.max_percentage_high_density_objects
+    threshold = function_inputs.density_level
+    data, all_densities, all_areas = density_summary(health_objects)
+
+    commit_details = {
+        "stream_id": automate_context.automation_run_data.project_id,
+        "commit_id": automate_context.automation_run_data.version_id,
+        "server_url": automate_context.automation_run_data.speckle_server_url,
+    }
+
+    summary_data = Report.generate_summary(
+        threshold, pass_rate_percentage, health_objects, commit_details
+    )
+
+    report_data = {
+        "table_data": summary_data["table"],
+        "result": summary_data["values"]["result"],
+    }
+
+    high_density_count = summary_data["values"]["fail_count"]
+    total_displayable_count = len(displayable_bases)
+
+    report = Report.generate_pdf(
+        all_densities, [float(a) for a in all_areas], data, threshold, report_data
+    )
+
+    file_name = Report.write_pdf_to_temp(report)
+    automate_context.store_file_result(file_name)
+
+    # colorise the objects that pass/fail and send to a new model version
+    Objects.objects.transport_recolorized_commit(
+        automate_context, health_objects, version_root_object
+    )
+
+    if summary_data["values"]["result"] == "Fail":
         automate_context.mark_run_failed(
-            "Automation failed: "
-            f"Found {count} object that have one of the forbidden speckle types: "
-            f"{function_inputs.forbidden_speckle_type}"
+            f"Too many high-density objects. Allowed: "
+            f"{pass_rate_percentage * 100}%, Found: "
+            f"{(high_density_count / total_displayable_count) * 100}%."
+        )
+    else:
+        automate_context.mark_run_success(
+            "Analysis complete. High-density objects within acceptable limits."
         )
 
-        # set the automation context view, to the original model / version view
-        # to show the offending objects
-        automate_context.set_context_view()
 
-    else:
-        automate_context.mark_run_success("No forbidden types found.")
-
-    # if the function generates file results, this is how it can be
-    # attached to the Speckle project / model
-    # automate_context.store_file_result("./report.pdf")
-
-
-def automate_function_without_inputs(automate_context: AutomationContext) -> None:
-    """A function example without inputs.
-
-    If your function does not need any input variables,
-     besides what the automation context provides,
-     the inputs argument can be omitted.
-    """
-    pass
-
-
-# make sure to call the function with the executor
 if __name__ == "__main__":
-    # NOTE: always pass in the automate function by its reference, do not invoke it!
-
-    # pass in the function reference with the inputs schema to the executor
+    # Entry point: Execute the automate function with defined inputs.
     execute_automate_function(automate_function, FunctionInputs)
-
-    # if the function has no arguments, the executor can handle it like so
-    # execute_automate_function(automate_function_without_inputs)
