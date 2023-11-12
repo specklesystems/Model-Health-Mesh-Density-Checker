@@ -1,100 +1,58 @@
-# Speckle Automate function template - Python
+# Speckle Density Analysis Tool
 
-This is a template repository for a Speckle Automate functions written in python
-using the [specklepy](https://pypi.org/project/specklepy/) SDK to interact with Speckle data.
+This tool is designed for the AEC (Architecture, Engineering, and Construction) industry to analyze and report on the
+density of mesh objects in Speckle projects. The goal is to help identify potentially problematic objects that might
+impact model performance based on a presumed relationship between heavy mesh objects and poor model health.
 
-This template contains the full scaffolding required to publish a function to the automate environment.
-Also has some sane defaults for a development environment setups.
+## Introduction
 
-## Getting started
+Heavy mesh objects can often be a sign of poor model health and can detrimentally affect performance. This tool provides
+a comprehensive analysis of Speckle projects to identify and report on the density of these objects. The report
+generated can then be used to take corrective measures, ensuring optimal model health.
 
-1. Use this template repository to create a new repository in your own / organization's profile.
+**Note**: The density's absolute value is unitless and used for comparative purposes. It's essential to
+interpret the results in the context of the specific project.
 
-Register the function 
+## Getting Started
 
-### Add new dependencies
+1. **Setup**: Clone this repository to your local machine or development environment.
+2. **Dependencies**: Install the required dependencies using `poetry` with the command `$ poetry add pandas`.
+3. **Configuration**: Edit the `launch.json` as required for your setup.
+4. **Local Development**: Refer to the "Local dev environment" section for local development and testing.
 
-To add new python package dependencies to the project, use:
-`$ poetry add pandas`
+## How to Use
 
-### Change launch variables
+1. **Initialization**: Create a new Speckle Automation.
+2. **Configuration**:
+    - Select your Speckle Project and Speckle Model.
+    - Choose the Speckle Function named "Density Analysis Tool".
+    - Set the desired density threshold and pass rate percentage.
+3. **Execution**: Click on "Create Automation". The tool will analyze the project and provide a comprehensive report.
 
-describe how the launch.json should be edited
+## Developing Your Own Tool
 
-### Github Codespaces
+If you're looking to create a custom function based on this template:
 
-Create a new repo from this template, and use the create new code.
-
-### Using this Speckle Function
-
-1. [Create](https://automate.speckle.dev/) a new Speckle Automation.
-1. Select your Speckle Project and Speckle Model.
-1. Select the existing Speckle Function named [`Random comment on IFC beam`](https://automate.speckle.dev/functions/e110be8fad).
-1. Enter a phrase to use in the comment.
-1. Click `Create Automation`.
-
-## Getting Started with creating your own Speckle Function
-
-1. [Register](https://automate.speckle.dev/) your Function with [Speckle Automate](https://automate.speckle.dev/) and select the Python template.
-1. A new repository will be created in your GitHub account.
-1. Make changes to your Function in `main.py`. See below for the Developer Requirements, and instructions on how to test.
-1. To create a new version of your Function, create a new [GitHub release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository) in your repository.
+1. **Clone**: Fork this repository and clone it to your development environment.
+2. **Register**: Register your function with Speckle Automate to obtain a Function Publish Token and a Function ID.
+3. **Configure**: Save your Token and ID as GitHub Action Secrets, named `SPECKLE_AUTOMATE_FUNCTION_PUBLISH_TOKEN`
+   and `SPECKLE_AUTOMATE_FUNCTION_ID` respectively.
+4. **Development**: Modify `main.py` as per your requirements. Remember to test your changes.
+5. **Deployment**: Committing to the main branch will create a new version of your Speckle Function.
 
 ## Developer Requirements
 
-1. Install the following:
-    - [Python 3](https://www.python.org/downloads/)
-    - [Poetry](https://python-poetry.org/docs/#installing-with-the-official-installer)
-1. Run `poetry shell && poetry install` to install the required Python packages.
+- Python 3
+- Poetry
+
+After installation, run `poetry shell && poetry install` to install the necessary Python packages.
 
 ## Building and Testing
 
-The code can be tested locally by running `poetry run pytest`.
-
-### Building and running the Docker Container Image
-
-Running and testing your code on your own machine is a great way to develop your Function; the following instructions are a bit more in-depth and only required if you are having issues with your Function in GitHub Actions or on Speckle Automate.
-
-#### Building the Docker Container Image
-
-Your code is packaged by the GitHub Action into the format required by Speckle Automate. This is done by building a Docker Image, which is then run by Speckle Automate. You can attempt to build the Docker Image yourself to test the building process locally.
-
-To build the Docker Container Image, you will need to have [Docker](https://docs.docker.com/get-docker/) installed.
-
-Once you have Docker running on your local machine:
-
-1. Open a terminal
-1. Navigate to the directory in which you cloned this repository
-1. Run the following command:
-
-    ```bash
-    docker build -f ./Dockerfile -t speckle_automate_python_example .
-    ```
-
-#### Running the Docker Container Image
-
-Once the image has been built by the GitHub Action, it is sent to Speckle Automate. When Speckle Automate runs your Function as part of an Automation, it will run the Docker Container Image. You can test that your Docker Container Image runs correctly by running it locally.
-
-1. To then run the Docker Container Image, run the following command:
-
-    ```bash
-    docker run --rm speckle_automate_python_example \
-    python -u main.py run \
-    '{"projectId": "1234", "modelId": "1234", "branchName": "myBranch", "versionId": "1234", "speckleServerUrl": "https://speckle.xyz", "automationId": "1234", "automationRevisionId": "1234", "automationRunId": "1234", "functionId": "1234", "functionName": "my function", "functionLogo": "base64EncodedPng"}' \
-    '{}' \
-    yourSpeckleServerAuthenticationToken
-    ```
-
-Let's explain this in more detail:
-
-`docker run --rm speckle_automate_python_example` tells Docker to run the Docker Container Image that we built earlier. `speckle_automate_python_example` is the name of the Docker Container Image that we built earlier. The `--rm` flag tells docker to remove the container after it has finished running, this frees up space on your machine.
-
-The line `python -u main.py run` is the command that is run inside the Docker Container Image. The rest of the command is the arguments that are passed to the command. The arguments are:
-
-- `'{"projectId": "1234", "modelId": "1234", "branchName": "myBranch", "versionId": "1234", "speckleServerUrl": "https://speckle.xyz", "automationId": "1234", "automationRevisionId": "1234", "automationRunId": "1234", "functionId": "1234", "functionName": "my function", "functionLogo": "base64EncodedPng"}'` - the metadata that describes the automation and the function.
-- `{}` - the input parameters for the function that the Automation creator is able to set. Here they are blank, but you can add your own parameters to test your function.
-- `yourSpeckleServerAuthenticationToken` - the authentication token for the Speckle Server that the Automation can connect to. This is required to be able to interact with the Speckle Server, for example to get data from the Model.
+Test the code locally using the command `poetry run pytest`. Ensure that the code is packaged into a Docker Container
+Image format required by Speckle Automate and test the container as well.
 
 ## Resources
 
-- [Learn](https://speckle.guide/dev/python.html) more about SpecklePy, and interacting with Speckle from Python.
+To learn more about interacting with Speckle from Python, refer to the
+official [SpecklePy documentation](<link_to_docs>).
