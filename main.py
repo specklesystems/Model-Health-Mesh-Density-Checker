@@ -20,14 +20,10 @@ from Objects.objects import (
 from Utilities.reporting import Report
 from Utilities.utilities import Utilities
 
+
 ## new render materials for objects passing/failing
 ## swap those into the original commit object
 ## send that back to the server
-
-
-import specklepy
-print(specklepy.__version__)
-
 
 class FunctionInputs(AutomateBase):
     """Definition of user inputs for this function.
