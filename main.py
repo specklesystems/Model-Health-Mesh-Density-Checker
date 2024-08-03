@@ -91,6 +91,8 @@ def automate_function(
     threshold = function_inputs.density_level
     data, all_densities, all_areas = density_summary(health_objects)
 
+    print(dir(automate_context.automation_run_data))
+
     commit_details = {
         "stream_id": automate_context.automation_run_data.project_id,
         "commit_id": automate_context.automation_run_data.version_id,
