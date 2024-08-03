@@ -25,6 +25,10 @@ from Utilities.utilities import Utilities
 ## send that back to the server
 
 
+import specklepy
+print(specklepy.__version__)
+
+
 class FunctionInputs(AutomateBase):
     """Definition of user inputs for this function.
 
