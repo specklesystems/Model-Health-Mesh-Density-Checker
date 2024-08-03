@@ -116,6 +116,9 @@ def automate_function(
     )
 
     file_name = Report.write_pdf_to_temp(report)
+
+    print(commit_details['server_url'])
+
     automate_context.store_file_result(file_name)
 
     # colorise the objects that pass/fail and send to a new model version
