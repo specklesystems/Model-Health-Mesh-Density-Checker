@@ -95,7 +95,7 @@ def automate_function(
 
     commit_details = {
         "stream_id": automate_context.automation_run_data.project_id,
-        "commit_id": automate_context.automation_run_data.version_id,
+        "commit_id": automate_context.automation_run_data.triggers[0].payload.version_id,
         "server_url": automate_context.automation_run_data.speckle_server_url,
     }
 
