@@ -276,14 +276,14 @@ def safe_store_file_result(automate_context: AutomationContext, file_name: str):
         # Attempt to store the file
         automate_context.store_file_result(file_name)
     except httpx.HTTPStatusError as e:
-        if e.response.status_code == 404:
+        if e.response.status_code != 404:
+            raise
+
+        else:
             # Handle the 404 error
             error_message = f"Unable to store file: {file_name}. Error: {str(e)}"
             print(error_message)  # For logging purposes
-            automate_context.mark_run_exception(error_message)
-
-        else:
-            raise
+            # automate_context.mark_run_exception(error_message)
     finally:
         # Restore the original URL
         automate_context.automation_run_data.speckle_server_url = original_url

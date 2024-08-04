@@ -73,11 +73,6 @@ def automate_function(
         automate_context, health_objects, function_inputs.density_level
     )
 
-
-
-
-
-
     colorise_densities(automate_context, health_objects)
 
     # Wrap up the analysis by marking the run either successful or failed.
@@ -114,7 +109,7 @@ def automate_function(
     file_name = write_pdf_to_temp(report)
 
     print("------------------------------------------------")
-    print(f"| {commit_details["server_url"]} |")
+    print(f"| {commit_details['server_url']} |")
     print("------------------------------------------------")
 
     safe_store_file_result(automate_context, file_name)
