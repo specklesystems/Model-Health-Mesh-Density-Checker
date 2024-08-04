@@ -404,9 +404,9 @@ def density_summary(
 
     return data, all_densities, all_areas
 
-def find_density_branch(automate_run_data):
-    client = automate_run_data.client
-    project_id = automate_run_data.project_id
+def find_density_branch(automation_context: AutomationContext) -> Optional[Base]:
+    client = automation_context.speckle_client
+    project_id = automation_context.automation_run_data.project_id
 
     branches = client.branch.list(project_id, 100, 0)
     for branch in branches:
@@ -425,7 +425,7 @@ def transport_recolorized_commit(
     # return the commit id of the new commit
     # create a new commit on a specific branch - we'll use "dirstat" for now
 
-    if find_density_branch(automate_context.automation_run_data) is not None:
+    if find_density_branch(automate_context) is not None:
         # commits on the density branch cannot be recolored
         print("------------------------------------------------")
         print("| CANNOT RECOLOR COMMITS ON THE DENSITY BRANCH |")
