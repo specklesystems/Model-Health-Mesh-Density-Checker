@@ -11,7 +11,7 @@ from objects.objects import (
     density_summary,
     transport_recolorized_commit
 )
-from src.utilities.reporting import generate_pdf, write_pdf_to_temp, generate_summary
+from src.utilities.reporting import generate_pdf, write_pdf_to_temp, generate_summary, safe_store_file_result
 from src.utilities.utilities import filter_displayable_bases
 
 class FunctionInputs(AutomateBase):
@@ -115,7 +115,7 @@ def automate_function(
 
     print(commit_details["server_url"])
 
-    automate_context.store_file_result(file_name)
+    safe_store_file_result(automate_context, file_name)
 
     # colorise the objects that pass/fail and send to a new model version
     transport_recolorized_commit(
