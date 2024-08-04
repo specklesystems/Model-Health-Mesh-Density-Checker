@@ -15,12 +15,6 @@ from objects.objects import (
 from src.utilities.reporting import generate_pdf, write_pdf_to_temp, generate_summary
 from src.utilities.utilities import filter_displayable_bases
 
-
-## new render materials for objects passing/failing
-## swap those into the original commit object
-## send that back to the server
-
-
 class FunctionInputs(AutomateBase):
     """Definition of user inputs for this function.
 
@@ -139,8 +133,3 @@ def automate_function(
         automate_context.mark_run_success(
             "Analysis complete. High-density objects within acceptable limits."
         )
-
-
-if __name__ == "__main__":
-    # Entry point: Execute the automate function with defined inputs.
-    execute_automate_function(automate_function, FunctionInputs)
