@@ -9,5 +9,9 @@ sys.path.append(str(src_path))
 from src.main import automate_function, FunctionInputs
 
 if __name__ == "__main__":
+    print("---------")
+    print("| BEGIN |")
+    print("---------")
+
     # Entry point: Execute the automate function with defined inputs.
     execute_automate_function(automate_function, FunctionInputs)

@@ -113,7 +113,9 @@ def automate_function(
 
     file_name = write_pdf_to_temp(report)
 
-    print(commit_details["server_url"])
+    print("------------------------------------------------")
+    print(f"| {commit_details["server_url"]} |")
+    print("------------------------------------------------")
 
     safe_store_file_result(automate_context, file_name)
 
