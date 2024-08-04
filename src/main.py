@@ -1,10 +1,3 @@
-(
-    """This module contains the business logic for a Speckle Automate function.
-
-    The purpose is to demonstrate how one can use the automation_context module
-    to process and analyze data in a Speckle project.
-    """
-)
 from pydantic import Field
 from speckle_automate import (
     AutomateBase,
@@ -12,14 +5,15 @@ from speckle_automate import (
     execute_automate_function,
 )
 
-from Objects.objects import (
+from objects.objects import (
     attach_visual_markers,
     colorise_densities,
     create_health_objects,
     density_summary,
+    transport_recolorized_commit
 )
-from Utilities.reporting import Report
-from Utilities.utilities import Utilities
+from src.utilities.reporting import generate_pdf, write_pdf_to_temp, generate_summary
+from src.utilities.utilities import filter_displayable_bases
 
 
 ## new render materials for objects passing/failing
@@ -37,7 +31,7 @@ class FunctionInputs(AutomateBase):
     density_level: float = Field(
         title="Density Threshold",
         description=(
-            "Set a density value as the threshold. Objects with "
+            "Set a density value as the threshold. objects with "
             "densities exceeding this value will be highlighted."
         ),
     )
@@ -72,7 +66,7 @@ def automate_function(
     version_root_object = automate_context.receive_version()
 
     # Filter out objects to keep only displayable ones with valid IDs.
-    displayable_bases = Utilities.filter_displayable_bases(version_root_object)
+    displayable_bases = filter_displayable_bases(version_root_object)
 
     if not displayable_bases:
         automate_context.mark_run_failed("No displayable mesh objects found.")
@@ -85,6 +79,7 @@ def automate_function(
     attach_visual_markers(
         automate_context, health_objects, function_inputs.density_level
     )
+
 
 
 
@@ -107,7 +102,7 @@ def automate_function(
         "server_url": automate_context.automation_run_data.speckle_server_url,
     }
 
-    summary_data = Report.generate_summary(
+    summary_data = generate_summary(
         threshold, pass_rate_percentage, health_objects, commit_details
     )
 
@@ -119,18 +114,18 @@ def automate_function(
     high_density_count = summary_data["values"]["fail_count"]
     total_displayable_count = len(displayable_bases)
 
-    report = Report.generate_pdf(
+    report = generate_pdf(
         all_densities, [float(a) for a in all_areas], data, threshold, report_data
     )
 
-    file_name = Report.write_pdf_to_temp(report)
+    file_name = write_pdf_to_temp(report)
 
     print(commit_details["server_url"])
 
     automate_context.store_file_result(file_name)
 
     # colorise the objects that pass/fail and send to a new model version
-    src.Objects.objects.transport_recolorized_commit(
+    transport_recolorized_commit(
         automate_context, health_objects, version_root_object
     )
 

@@ -10,7 +10,7 @@ from specklepy.objects.graph_traversal.traversal import GraphTraversal, Traversa
 from specklepy.objects.other import RenderMaterial
 from specklepy.objects.primitive import Interval
 
-from src.Utilities import Utilities
+from src.utilities.utilities import try_get_display_value, get_byte_size
 
 T = TypeVar("T", bound=Base)
 
@@ -93,7 +93,7 @@ class HealthObject:
         )  # Fetch the parent_type attribute
         self.speckle_type = base_object.speckle_type
         self.units = base_object.units
-        display_value = Utilities.try_get_display_value(base_object)
+        display_value = try_get_display_value(base_object)
 
         if display_value:
             self.display_values = display_value
@@ -120,9 +120,9 @@ class HealthObject:
             #     self.areas[dv.id] = dv.bbox.xSize.length * dv.bbox.ySize.length
             # elif isinstance(dv, Mesh):
             if isinstance(dv, Mesh):
-                x_interval = self.interval_from_coordinates_by_offset(dv.vertices, 0)
-                y_interval = self.interval_from_coordinates_by_offset(dv.vertices, 1)
-                z_interval = self.interval_from_coordinates_by_offset(dv.vertices, 2)
+                x_interval = interval_from_coordinates_by_offset(dv.vertices, 0)
+                y_interval = interval_from_coordinates_by_offset(dv.vertices, 1)
+                z_interval = interval_from_coordinates_by_offset(dv.vertices, 2)
 
                 self.bounding_volumes[dv.id] = (
                     x_interval.length() * y_interval.length() * z_interval.length()
@@ -151,24 +151,24 @@ class HealthObject:
         Returns:
             int: The computed byte size.
         """
-        self.sizes.update({dv.id: Utilities.get_byte_size(dv) for dv in display_values})
+        self.sizes.update({dv.id: get_byte_size(dv) for dv in display_values})
 
-    @staticmethod
-    def interval_from_coordinates_by_offset(
-        vertices: List[float], offset: int = 0
-    ) -> Interval:
-        """Compute interval from coordinates by offset.
 
-        Args:
-            vertices (List[float]): List of vertex coordinates.
-            offset (int, optional): Offset to start from. Defaults to 0.
+def interval_from_coordinates_by_offset(
+    vertices: List[float], offset: int = 0
+) -> Interval:
+    """Compute interval from coordinates by offset.
 
-        Returns:
-            Interval: Computed interval.
-        """
-        axis_coordinates = vertices[offset::3]
-        axis_interval = Interval(start=min(axis_coordinates), end=max(axis_coordinates))
-        return axis_interval
+    Args:
+        vertices (List[float]): List of vertex coordinates.
+        offset (int, optional): Offset to start from. Defaults to 0.
+
+    Returns:
+        Interval: Computed interval.
+    """
+    axis_coordinates = vertices[offset::3]
+    axis_interval = Interval(start=min(axis_coordinates), end=max(axis_coordinates))
+    return axis_interval
 
 
 # def colorise_densities(
@@ -250,7 +250,7 @@ def colorise_densities(
 
 def colorize(
     health_objects
-) -> tuple[dict[Any, dict[str, Any]], list[Any], dict[Any, str]]:
+) -> tuple[dict[Any, dict[str, Any]], list[Any], dict[Any, str]] | None:
     densities = {ho.id: ho.aggregate_density for ho in health_objects.values()}
 
     if not densities:
@@ -440,7 +440,7 @@ def transport_recolorized_commit(
             and hasattr(current_object, "id")
             and current_object.id in health_objects.keys()
         ):
-            display_value = Utilities.try_get_display_value(current_object)
+            display_value = try_get_display_value(current_object)
 
             if display_value:
                 # if display_value is an iterable
@@ -452,10 +452,10 @@ def transport_recolorized_commit(
                         ].render_material
 
                     # concatenate the names of all the render materials
-                    render_material_names = [
-                        display_value_object.renderMaterial.name
-                        for display_value_object in display_value
-                    ]
+                    # renderder_material_names = [
+                    #     display_value_object.renderMaterial.name
+                    #     for display_value_object in display_value
+                    # ]
 
                 else:
                     # Apply the render material to the object
@@ -464,7 +464,7 @@ def transport_recolorized_commit(
                     ].render_material
 
                     # concatenate the names of all the render materials
-                    render_material_names = [display_value.renderMaterial.name]
+                    # render_material_names = [display_value.renderMaterial.name]
 
                 current_object["density_rendered"] = True
                 current_object["densities"] = health_objects[

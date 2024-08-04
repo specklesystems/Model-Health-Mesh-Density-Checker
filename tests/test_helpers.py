@@ -1,8 +1,8 @@
 import pytest
 from specklepy.objects.base import Base
 
-from src.Objects import HealthObject
-from src.Utilities import Utilities
+from src.objects.objects import HealthObject
+from src.utilities.utilities import filter_displayable_bases
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def speckle_server_url(request) -> str:
 
 
 def test_filter_displayable_bases(mock_base):
-    displayable_bases = Utilities.filter_displayable_bases(mock_base)
+    displayable_bases = filter_displayable_bases(mock_base)
     assert (
         len(displayable_bases) == 2
     )
