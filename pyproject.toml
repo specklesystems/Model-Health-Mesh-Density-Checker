@@ -8,18 +8,19 @@ packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-matplotlib = "^3.8.0"
+matplotlib = "^3.9.1"
 seaborn = "^0.13.0"
-reportlab = "^4.0.6"
+reportlab = "^4.2.2"
 mypy = "^1.11.1"
 pydantic = "^2.8.2"
 specklepy = "^2.19.5"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.3.0"
+black = "^23.12.1"
 ruff = "^0.0.271"
-pytest = "^7.4.2"
-python-dotenv = "^1.0.0"
+pytest = "^7.4.4"
+python-dotenv = "^1.0.1"
+vulture = "^2.11"
 
 [build-system]
 requires = ["poetry-core"]

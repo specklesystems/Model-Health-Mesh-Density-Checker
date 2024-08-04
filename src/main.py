@@ -1,8 +1,7 @@
 from pydantic import Field
 from speckle_automate import (
     AutomateBase,
-    AutomationContext,
-    execute_automate_function,
+    AutomationContext
 )
 
 from objects.objects import (
