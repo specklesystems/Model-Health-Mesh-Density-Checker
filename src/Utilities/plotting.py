@@ -127,4 +127,3 @@ class Plotting:
         plt.ylabel("Count")
         plt.title("Area Distribution")
         plt.grid(True)
-        # plt.show()

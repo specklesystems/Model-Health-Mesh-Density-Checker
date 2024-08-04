@@ -2,12 +2,12 @@
 from typing import Any
 
 import pytest
-
 # Speckle is a data platform for AEC; here we're importing essential modules from it
 from specklepy.api import operations
 from specklepy.api.client import SpeckleClient
 from specklepy.objects import Base
 from specklepy.transports.server import ServerTransport
+
 
 # Setting up some pytest fixtures for testing
 # Fixtures are a way to provide consistent test data or configuration for each test

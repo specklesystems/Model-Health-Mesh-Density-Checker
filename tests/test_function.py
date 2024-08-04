@@ -14,7 +14,7 @@ from speckle_automate import (
 from specklepy.api.client import SpeckleClient
 from specklepy.objects.base import Base
 
-from main import FunctionInputs, automate_function
+from src.main import FunctionInputs, automate_function
 
 
 def crypto_random_string(length: int) -> str:
@@ -92,7 +92,6 @@ def test_object() -> Base:
     root_object = Base()
     root_object.foo = "bar"
     return root_object
-
 
 
 @pytest.fixture()

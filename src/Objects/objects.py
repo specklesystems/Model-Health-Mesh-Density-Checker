@@ -1,4 +1,3 @@
-import json
 import statistics
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, List, Optional, TypeVar, Union
@@ -11,7 +10,7 @@ from specklepy.objects.graph_traversal.traversal import GraphTraversal, Traversa
 from specklepy.objects.other import RenderMaterial
 from specklepy.objects.primitive import Interval
 
-from Utilities.utilities import Utilities
+from src.Utilities import Utilities
 
 T = TypeVar("T", bound=Base)
 

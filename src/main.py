@@ -1,8 +1,10 @@
-"""This module contains the business logic for a Speckle Automate function.
+(
+    """This module contains the business logic for a Speckle Automate function.
 
-The purpose is to demonstrate how one can use the automation_context module
-to process and analyze data in a Speckle project.
-"""
+    The purpose is to demonstrate how one can use the automation_context module
+    to process and analyze data in a Speckle project.
+    """
+)
 from pydantic import Field
 from speckle_automate import (
     AutomateBase,
@@ -10,7 +12,6 @@ from speckle_automate import (
     execute_automate_function,
 )
 
-import Objects.objects
 from Objects.objects import (
     attach_visual_markers,
     colorise_densities,
@@ -24,6 +25,7 @@ from Utilities.utilities import Utilities
 ## new render materials for objects passing/failing
 ## swap those into the original commit object
 ## send that back to the server
+
 
 class FunctionInputs(AutomateBase):
     """Definition of user inputs for this function.
@@ -53,7 +55,7 @@ class FunctionInputs(AutomateBase):
 
 
 def automate_function(
-        automate_context: AutomationContext, function_inputs: FunctionInputs
+    automate_context: AutomationContext, function_inputs: FunctionInputs
 ) -> None:
     """Analyzes Speckle data and provides visual markers and notifications.
 
@@ -84,6 +86,10 @@ def automate_function(
         automate_context, health_objects, function_inputs.density_level
     )
 
+
+
+
+
     colorise_densities(automate_context, health_objects)
 
     # Wrap up the analysis by marking the run either successful or failed.
@@ -95,7 +101,9 @@ def automate_function(
 
     commit_details = {
         "stream_id": automate_context.automation_run_data.project_id,
-        "commit_id": automate_context.automation_run_data.triggers[0].payload.version_id,
+        "commit_id": automate_context.automation_run_data.triggers[
+            0
+        ].payload.version_id,
         "server_url": automate_context.automation_run_data.speckle_server_url,
     }
 
@@ -117,12 +125,12 @@ def automate_function(
 
     file_name = Report.write_pdf_to_temp(report)
 
-    print(commit_details['server_url'])
+    print(commit_details["server_url"])
 
     automate_context.store_file_result(file_name)
 
     # colorise the objects that pass/fail and send to a new model version
-    Objects.objects.transport_recolorized_commit(
+    src.Objects.objects.transport_recolorized_commit(
         automate_context, health_objects, version_root_object
     )
 

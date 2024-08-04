@@ -1,9 +1,9 @@
-from typing import List, TypeVar, Iterable, Optional, Tuple
+from typing import List, TypeVar, Iterable, Optional
 
 from specklepy.objects.base import Base
 import sys
 
-from Utilities.flatten import extract_base_and_transform
+from src.Utilities.flatten import extract_base_and_transform
 
 T = TypeVar("T", bound=Base)
 

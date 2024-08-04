@@ -1,8 +1,8 @@
 import pytest
 from specklepy.objects.base import Base
 
-from Objects.objects import HealthObject
-from Utilities.utilities import Utilities
+from src.Objects import HealthObject
+from src.Utilities import Utilities
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def test_filter_displayable_bases(mock_base):
     displayable_bases = Utilities.filter_displayable_bases(mock_base)
     assert (
         len(displayable_bases) == 2
-    )  # Only child_1 and child_2 should be considered displayable
+    )
 
 
 def test_convert_from_base_with_nested_elements(mock_base):
@@ -48,7 +48,7 @@ def test_convert_from_base_with_nested_elements(mock_base):
     assert health_obj.id == "12345"
     assert (
         health_obj.speckle_type == "Base"
-    )  # Assuming no speckle_type was set in the mock_base
+    )
 
 
 def test_density_with_nested_elements(mock_base):

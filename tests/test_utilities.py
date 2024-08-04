@@ -2,7 +2,7 @@ import pytest
 from specklepy.objects.base import Base
 from specklepy.objects.geometry import Mesh
 
-from Utilities.utilities import Utilities
+from src.Utilities import Utilities
 
 
 @pytest.fixture

@@ -1,10 +1,10 @@
 import io
-import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import IO, Any, Dict, List, Union
 
+import httpx
 import matplotlib.pyplot as plt
 from PIL import Image as PILImage
 from reportlab.lib.colors import green, red
@@ -21,8 +21,8 @@ from reportlab.platypus import (
     TableStyle,
 )
 
-from Objects.objects import HealthObject
-from Utilities.plotting import Plotting
+from src.Objects.objects import HealthObject
+from src.Utilities.plotting import Plotting
 
 
 class Report:
@@ -260,3 +260,32 @@ class Report:
         temp_file.write_bytes(report.read())
 
         return str(temp_file)
+
+
+from speckle_automate import AutomationContext
+
+
+def safe_store_file_result(automate_context: AutomationContext, file_name: str):
+    # Store the original URL
+    original_url = automate_context.automation_run_data.speckle_server_url
+
+    try:
+        # Modify the URL property of the automation_run_data
+        automate_context.automation_run_data.speckle_server_url = original_url.rstrip(
+            "/"
+        )
+
+        # Attempt to store the file
+        automate_context.store_file_result(file_name)
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            # Handle the 404 error
+            error_message = f"Unable to store file: {file_name}. Error: {str(e)}"
+            print(error_message)  # For logging purposes
+            automate_context.mark_run_exception(error_message)
+
+        else:
+            raise
+    finally:
+        # Restore the original URL
+        automate_context.automation_run_data.speckle_server_url = original_url
