@@ -3,7 +3,7 @@ from typing import List, TypeVar, Iterable, Optional
 
 from specklepy.objects.base import Base
 
-from flatten import extract_base_and_transform
+from src.utilities.flatten import extract_base_and_transform
 
 T = TypeVar("T", bound=Base)
 
